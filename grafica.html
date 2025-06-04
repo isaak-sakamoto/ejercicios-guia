@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gráfica de Ejercicios</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6">
+
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xl">
+    <h1 class="text-2xl font-bold text-center mb-4">📈 Progreso Semanal</h1>
+    <canvas id="grafica"></canvas>
+  </div>
+
+  <script>
+    const rawFechas = JSON.parse(localStorage.getItem("ejercicios_realizados") || "[]");
+
+    // Agrupar por semana (ISO week)
+    function obtenerSemanaISO(fechaStr) {
+      const fecha = new Date(fechaStr);
+      const tempDate = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      const dayNum = tempDate.getUTCDay() || 7;
+      tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
+      return `Semana ${weekNo} - ${tempDate.getUTCFullYear()}`;
+    }
+
+    const resumenSemanas = {};
+    rawFechas.forEach(fecha => {
+      const semana = obtenerSemanaISO(fecha);
+      resumenSemanas[semana] = (resumenSemanas[semana] || 0) + 1;
+    });
+
+    const etiquetas = Object.keys(resumenSemanas);
+    const valores = Object.values(resumenSemanas);
+
+    const ctx = document.getElementById('grafica').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: etiquetas,
+        datasets: [{
+          label: 'Días con ejercicios completados',
+          data: valores,
+          backgroundColor: '#34D399',
+          borderRadius: 8
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
