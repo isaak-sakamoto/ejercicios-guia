@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seguimiento de Ejercicios</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center justify-center p-4">
+
+  <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-4 text-center">📆 Seguimiento de Ejercicios</h1>
+
+    <p class="text-center text-lg mb-4" id="fecha-hoy"></p>
+
+    <button id="boton-marcar" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full mb-4">
+      He hecho los ejercicios hoy ✅
+    </button>
+
+    <div class="text-center mb-2">
+      <p class="text-sm text-gray-600">Días completados: <span id="contador-dias" class="font-bold">0</span></p>
+    </div>
+
+    <div class="mt-4">
+      <h2 class="text-md font-semibold mb-2">Historial:</h2>
+      <ul id="lista-fechas" class="text-sm text-gray-700 list-disc list-inside"></ul>
+    </div>
+
+    <!-- Botón para ver gráfica -->
+    <a href="grafica.html" class="block mt-6 text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+      Ver gráfica de progreso 📊
+    </a>
+
+    <!-- (Opcional) Botón para reiniciar el historial -->
+    <!--
+    <button id="resetear" class="mt-4 w-full text-sm text-red-500 hover:underline">
+      Borrar historial ❌
+    </button>
+    -->
+  </div>
+
+  <script>
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    const fechaTexto = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById("fecha-hoy").textContent = `Hoy es ${fechaTexto}`;
+
+    const boton = document.getElementById("boton-marcar");
+    const contador = document.getElementById("contador-dias");
+    const lista = document.getElementById("lista-fechas");
+
+    let diasCompletados = JSON.parse(localStorage.getItem("ejercicios_realizados") || "[]");
+
+    function actualizarUI() {
+      contador.textContent = diasCompletados.length;
+      lista.innerHTML = diasCompletados
+        .sort()
+        .map(dia => `<li>${new Date(dia).toLocaleDateString('es-ES')}</li>`)
+        .join('');
+    }
+
+    boton.addEventListener("click", () => {
+      if (!diasCompletados.includes(fechaHoy)) {
+        diasCompletados.push(fechaHoy);
+        localStorage.setItem("ejercicios_realizados", JSON.stringify(diasCompletados));
+        actualizarUI();
+      } else {
+        alert("Ya has marcado este día como completado ✅");
+      }
+    });
+
+    /*
+    // Para activar botón de resetear historial
+    document.getElementById("resetear").addEventListener("click", () => {
+      if (confirm("¿Estás seguro de que quieres borrar todo el historial?")) {
+        localStorage.removeItem("ejercicios_realizados");
+        diasCompletados = [];
+        actualizarUI();
+      }
+    });
+    */
+
+    actualizarUI();
+  </script>
+</body>
+</html>
